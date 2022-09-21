@@ -3,7 +3,12 @@ pd.options.mode.chained_assignment = None
 from sklearn.cluster import KMeans
 import pickle
 
-def preprocess(df):
+def preprocess(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean hotel data
+    :param df: Hotel dataframe
+    :return: Hotel dataframe
+    """
     df['latitude'] = df['latitude'].astype(float)
     df['longitude'] = df['longitude'].astype(float)
     df['rating'] = df['rating'].astype(float)
@@ -12,7 +17,12 @@ def preprocess(df):
     df['facilities'] = df['facilities1']
     return df
 
-def create_feature_facilities(df):
+def create_feature_facilities(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    Create feature facilities
+    :param df: Hotel dataframe
+    :return: Hotel dataframe with feature facilities
+    """
     all_facilities_list = list()
     for i in range(len(df)):
         facilities1 = df.facilities1[i]
@@ -36,12 +46,21 @@ def create_feature_facilities(df):
     df = df.drop(columns=['Free Wi-Fi', 'Free breakfast'])
     return df
 
-def predict_and_save_result(df, model):
+def predict_and_save_result(df:pd.DataFrame, model):
+    """
+    Predict data and save result of predict
+    :param df: Hotel dataframee
+    :param model: Model
+    """
     all_predictions = model.predict(dff)
     df['prdict'] = all_predictions
     df.to_excel('data/result.xlsx')
 
 def save_model(model):
+    """
+    Save model to file .sav
+    :param model: Model
+    """
     filename = 'model.sav'
     pickle.dump(model, open(filename, 'wb'))
 

@@ -1,12 +1,15 @@
 from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from plotly import graph_objs as go
 import pandas as pd
 pd.options.mode.chained_assignment = None
-import json
 
-def preprocess(df):
+def preprocess(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean hotel data
+    :param df: Hotel dataframe
+    :return: Hotel dataframe
+    """
     df['latitude'] = df['latitude'].astype(float)
     df['longitude'] = df['longitude'].astype(float)
     df['rating'] = df['rating'].astype(float)
@@ -15,7 +18,12 @@ def preprocess(df):
     df['facilities'] = df['facilities1']
     return df
 
-def create_feature_facilities(df):
+def create_feature_facilities(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    Create feature facilities
+    :param df: Hotel dataframe
+    :return: Hotel dataframe with feature facilities
+    """
     all_facilities_list = list()
     for i in range(len(df)):
         facilities1 = df.facilities1[i]
@@ -39,27 +47,33 @@ def create_feature_facilities(df):
     df = df.drop(columns=['Free Wi-Fi', 'Free breakfast'])
     return df
 
+# Prepare hotel data
 df = pd.read_excel('data/hotel_data.xlsx')
 df = preprocess(df)
 df = create_feature_facilities(df)
+
+# Load model preediction data
 result = pd.read_excel('data/result.xlsx')
+
+# Plot bar graph from model prediction data
 fig_price = px.bar(result, x='predict', y='price')
 fig_review = px.bar(result, x='predict', y='review')
 
-def plot_map(df):
+def plot_map(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    Plot scatter map with hotel position
+    :param df: Hottel dataframee
+    :return: Scattr map
+    """
     fig = px.scatter_mapbox(df, lat=df.latitude, lon=df.longitude, hover_name="name", hover_data=["price"],
                             color=df.predict, size=df.rating, size_max=10,
-                            # color_discrete_sequence=["fuchsia"],
-                            zoom=9,
-                            # height=500,
-                            width=500,
-                            center={"lat": 7.965, "lon": 98.346},
+                            zoom=9, width=500, center={"lat": 7.965, "lon": 98.346}
                             )
     fig.update_layout(mapbox_style="open-street-map")
     fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
 
-def serve_layout1() -> html.Div:
+def serve_layout() -> html.Div:
     return html.Div([
         html.Div([
             html.H1('Hotel Dashboard'),
@@ -115,18 +129,15 @@ def serve_layout1() -> html.Div:
                     ], id='table-side1')
             ], id='visualisation'),
             html.Div([
-                # html.Label("Passenger class1", className='other-labels'),
                 dcc.Graph(id='price-bar', figure=fig_price),
                 dcc.Graph(id='review-bar', figure=fig_review),
             ], id='data-extract')
         ], id='right-container')
     ], id='container')
 
-
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = serve_layout1
-
+app.layout = serve_layout
 
 @app.callback(
     Output('_name', 'children'),
@@ -141,9 +152,7 @@ def display_click_data(clickData):
     star = hotel_data['star']
     price = hotel_data['price']
     rating = hotel_data['rating']
-
     return f'Hotel name: {name}', f'Star: {star}', f'Price: {price}', f'Rating: {rating}'
-
 
 @app.callback(
     Output('map', 'figure'),
@@ -160,9 +169,7 @@ def update_output(star_value, price_range, rating_range):
     new_df = new_df[new_df.rating >= rating_range[0]]
     new_df = new_df[new_df.rating <= rating_range[1]]
     fig = plot_map(new_df)
-
     return fig
-
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=8050)
