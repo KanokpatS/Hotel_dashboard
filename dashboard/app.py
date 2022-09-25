@@ -52,7 +52,7 @@ df = pd.read_excel('data/hotel_data.xlsx')
 df = preprocess(df)
 df = create_feature_facilities(df)
 
-# Load model preediction data
+# Load model prediction data
 result = pd.read_excel('data/result.xlsx')
 
 # Plot bar graph from model prediction data
@@ -149,11 +149,10 @@ app.layout = serve_layout
 def display_click_data(clickData):
     name = clickData["points"][0]['hovertext']
     hotel_data = df[df.name == name]
-    star = hotel_data['star']
-    price = hotel_data['price']
-    rating = hotel_data['rating']
-    return f'Hotel name: {name}', f'Star: {star}', f'Price: {price}', f'Rating: {rating}'
-
+    star = hotel_data.iloc[0, 6]
+    price = hotel_data.iloc[0, 7]
+    rating = hotel_data.iloc[0, 4]
+    return f'Hotel name: {name}', f'Star: {star}', f'Price: {price} Baht', f'Rating: {rating}'
 @app.callback(
     Output('map', 'figure'),
     Input('star-dropdown', 'value'),
