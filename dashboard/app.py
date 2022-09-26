@@ -208,4 +208,4 @@ def update_stacked_bar(model_type, n_class, n_clicks, class_):
     return fig
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=8050)
+    app.run(debug=False, host='0.0.0.0', port=8080)
