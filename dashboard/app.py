@@ -23,16 +23,13 @@ def count_hotel_in_group_predict(df: pd.DataFrame, class_:str) -> pd.DataFrame:
 
 # Prepare hotel data
 df = pd.read_excel('data/hotel_data.xlsx')
+df_train = df.copy()
 model_clustering = Model_clustering(n_class=5, type='KMeans')
 df = model_clustering.clean_data(df)
 df = model_clustering.create_feature_facilities(df)
 
 # Load model prediction data
-result = pd.read_excel('data/result.xlsx')
-
-# Plot bar graph from model prediction data
-fig_review = px.bar(result, x='predict', y='star')
-# fig = px.bar(result, x="predict", y="star", color="medal", title="Long-Form Input")
+result = pd.read_excel('data/output/result.xlsx')
 
 def plot_map(df:pd.DataFrame) -> pd.DataFrame:
     """
@@ -89,9 +86,9 @@ def serve_layout() -> html.Div:
                 min=0,
                 max=5, value=[0, 5], id='rating_slider', className='n-slider'),
             html.Label('Model type', className='dropdown-labels'),
-            dcc.Dropdown(['rating', 'review', 'price'], 'price', id='model-type-dropdown', className='dropdown1'),
+            dcc.Dropdown(['KMeans'], 'KMeans', id='model-type-dropdown', className='dropdown1'),
             html.Label('Number of cluster', className='dropdown-labels'),
-            dcc.Dropdown(['rating', 'review', 'price'], 'price', id='n-dropdown', className='dropdown1'),
+            dcc.Dropdown([3, 4, 5, 6, 7], 5, id='n-dropdown', className='dropdown1'),
             html.Button(id='update-button', children="Apply Model", n_clicks=0)
         ], id='left-container'),
         html.Div([
@@ -144,12 +141,20 @@ def display_click_data(clickData):
 
 @app.callback(
     Output('map', 'figure'),
+    State('model-type-dropdown', 'value'),
+    State('n-dropdown', 'value'),
+    Input('update-button', 'n_clicks'),
     Input('star-dropdown', 'value'),
     Input('price_slider', 'value'),
     Input('rating_slider', 'value')
 )
-def update_map(star_value, price_range, rating_range):
+def update_map(model_type, n_class, n_clicks, star_value, price_range, rating_range):
     new_df = result.copy()
+    if n_clicks > 0:
+        model_clustering = Model_clustering(n_class=n_class, type=model_type)
+        model = model_clustering.training(df_train)
+        result_df = model_clustering.predict(df_train, model)
+        new_df = result_df.copy()
     if len(star_value) > 0:
         new_df = new_df[new_df['star'].isin(star_value)]
     new_df = new_df[new_df.price >= price_range[0]]
@@ -161,10 +166,18 @@ def update_map(star_value, price_range, rating_range):
 
 @app.callback(
     Output('price-bar', 'figure'),
+    State('model-type-dropdown', 'value'),
+    State('n-dropdown', 'value'),
+    Input('update-button', 'n_clicks'),
     Input('bar-dropdown', 'value')
 )
-def update_bar(y_axis):
+def update_bar(model_type, n_class, n_clicks, y_axis):
     agg_result_df = result.copy()
+    if n_clicks > 0:
+        model_clustering = Model_clustering(n_class=n_class, type=model_type)
+        model = model_clustering.training(df_train)
+        result_df = model_clustering.predict(df_train, model)
+        agg_result_df = result_df.copy()
     agg_result_df = agg_result_df[['predict', 'rating', 'price', 'review']]
     agg_result_df = find_average_value(agg_result_df)
     fig = px.bar(agg_result_df, x='predict', y=y_axis)
@@ -172,10 +185,18 @@ def update_bar(y_axis):
 
 @app.callback(
     Output('star-plot', 'figure'),
+    State('model-type-dropdown', 'value'),
+    State('n-dropdown', 'value'),
+    Input('update-button', 'n_clicks'),
     Input('stacked-dropdown', 'value')
 )
-def update_stacked_bar(class_):
+def update_stacked_bar(model_type, n_class, n_clicks, class_):
     agg_result_df = result.copy()
+    if n_clicks > 0:
+        model_clustering = Model_clustering(n_class=n_class, type=model_type)
+        model = model_clustering.training(df_train)
+        result_df = model_clustering.predict(df_train, model)
+        agg_result_df = result_df.copy()
     agg_result_df = count_hotel_in_group_predict(agg_result_df, class_)
     fig = px.bar(agg_result_df, x="predict", y="count", color="star")
     return fig

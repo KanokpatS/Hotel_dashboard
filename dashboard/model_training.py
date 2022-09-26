@@ -90,16 +90,9 @@ class Model_clustering:
         dff = self.preprocess(df)
         all_predictions = model.predict(dff)
         df['predict'] = all_predictions
-        df.to_excel('data/result1.xlsx')
+        filename = f'data/output/result_{self.type}_{self.n_class}.xlsx'
+        df.to_excel(filename)
         return df
-
-    def save_model(self, model):
-        """
-        Save model to file .sav
-        :param model: Model
-        """
-        filename = f'model/model_{self.type}_{self.n_class}.sav'
-        pickle.dump(model, open(filename, 'wb'))
 
 if __name__ == '__main__':
     df = pd.read_excel('data/hotel_data.xlsx')
