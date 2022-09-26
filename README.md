@@ -7,7 +7,7 @@
   
 2. Build docker container
 
-  `docker run -it --name hotel_dashboard -v $PWD\:/app -p 8050:8050 hotel_dashboard`
+  `docker run -it --name hotel_dashboard -v $PWD\:/app -p 8080:8080 hotel_dashboard`
   
   3. Run file app.py
   
