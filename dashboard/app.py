@@ -2,50 +2,8 @@ from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
-pd.options.mode.chained_assignment = None
 
-def preprocess(df:pd.DataFrame) -> pd.DataFrame:
-    """
-    Clean hotel data
-    :param df: Hotel dataframe
-    :return: Hotel dataframe
-    """
-    df['latitude'] = df['latitude'].astype(float)
-    df['longitude'] = df['longitude'].astype(float)
-    df['rating'] = df['rating'].astype(float)
-    df['price'] = df['price'].astype(float)
-    df['review'] = df['review'].astype(int)
-    df['facilities'] = df['facilities1']
-    return df
-
-def create_feature_facilities(df:pd.DataFrame) -> pd.DataFrame:
-    """
-    Create feature facilities
-    :param df: Hotel dataframe
-    :return: Hotel dataframe with feature facilities
-    """
-    all_facilities_list = list()
-    for i in range(len(df)):
-        facilities1 = df.facilities1[i]
-        facilities2 = df.facilities2[i]
-        facilities3 = df.facilities3[i]
-        facilities4 = df.facilities4[i]
-        facilities = [facilities1, facilities2, facilities3, facilities4]
-        all_facilities_list.append(facilities1)
-        all_facilities_list.append(facilities2)
-        all_facilities_list.append(facilities3)
-        all_facilities_list.append(facilities4)
-        df['facilities'][i] = facilities
-    df = df.drop(columns=['facilities1', 'facilities2', 'facilities3', 'facilities4'])
-    for fac in list(set(all_facilities_list)):
-        df[fac] = 0
-    for i in range(len(df)):
-        for fac in df['facilities'][i]:
-            df[fac][i] = 1
-    df['Wi-Fi'] = df['Wi-Fi'] + df['Free Wi-Fi']
-    df['Breakfast'] = df['Breakfast'] + df['Free breakfast']
-    df = df.drop(columns=['Free Wi-Fi', 'Free breakfast'])
-    return df
+from model_training import Model_clustering
 
 def find_average_value(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -60,8 +18,9 @@ def find_average_value(df: pd.DataFrame) -> pd.DataFrame:
 
 # Prepare hotel data
 df = pd.read_excel('data/hotel_data.xlsx')
-df = preprocess(df)
-df = create_feature_facilities(df)
+model_clustering = Model_clustering(n_class=5, type='KMeans')
+df = model_clustering.clean_data(df)
+df = model_clustering.create_feature_facilities(df)
 
 # Load model prediction data
 result = pd.read_excel('data/result.xlsx')
