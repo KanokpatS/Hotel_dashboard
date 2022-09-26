@@ -47,6 +47,17 @@ def create_feature_facilities(df:pd.DataFrame) -> pd.DataFrame:
     df = df.drop(columns=['Free Wi-Fi', 'Free breakfast'])
     return df
 
+def find_average_value(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Find average value of hotel group by predict class
+    :param df:
+    :return: Aggregate dataframe
+    """
+    df_summary = df.groupby(['predict'])\
+        .agg(rating=('rating', 'mean'), price=('price', 'mean'), review=('review', 'mean'))
+    df_summary = df_summary.reset_index()
+    return df_summary
+
 # Prepare hotel data
 df = pd.read_excel('data/hotel_data.xlsx')
 df = preprocess(df)
@@ -56,7 +67,6 @@ df = create_feature_facilities(df)
 result = pd.read_excel('data/result.xlsx')
 
 # Plot bar graph from model prediction data
-fig_price = px.bar(result, x='predict', y='price')
 fig_review = px.bar(result, x='predict', y='review')
 
 def plot_map(df:pd.DataFrame) -> pd.DataFrame:
@@ -129,8 +139,14 @@ def serve_layout() -> html.Div:
                     ], id='table-side1')
             ], id='visualisation'),
             html.Div([
-                dcc.Graph(id='price-bar', figure=fig_price),
-                dcc.Graph(id='review-bar', figure=fig_review),
+                html.Div([
+                    dcc.Dropdown(['rating', 'review', 'price'], 'price', id='bar-dropdown'),
+                    dcc.Graph(id='price-bar'),
+                ], id='data-extract1'),
+                html.Div([
+                    dcc.Dropdown(['star'], 'star', id='scatter-dropdown'),
+                    dcc.Graph(id='star-plot', figure=fig_review),
+                ], id='data-extract2')
             ], id='data-extract')
         ], id='right-container')
     ], id='container')
@@ -153,13 +169,14 @@ def display_click_data(clickData):
     price = hotel_data.iloc[0, 7]
     rating = hotel_data.iloc[0, 4]
     return f'Hotel name: {name}', f'Star: {star}', f'Price: {price} Baht', f'Rating: {rating}'
+
 @app.callback(
     Output('map', 'figure'),
     Input('star-dropdown', 'value'),
     Input('price_slider', 'value'),
     Input('rating_slider', 'value')
 )
-def update_output(star_value, price_range, rating_range):
+def update_map(star_value, price_range, rating_range):
     new_df = result.copy()
     if len(star_value) > 0:
         new_df = new_df[new_df['star'].isin(star_value)]
@@ -168,6 +185,17 @@ def update_output(star_value, price_range, rating_range):
     new_df = new_df[new_df.rating >= rating_range[0]]
     new_df = new_df[new_df.rating <= rating_range[1]]
     fig = plot_map(new_df)
+    return fig
+
+@app.callback(
+    Output('price-bar', 'figure'),
+    Input('bar-dropdown', 'value')
+)
+def update_bar(y_axis):
+    agg_result_df = result.copy()
+    agg_result_df = agg_result_df[['predict', 'rating', 'price', 'review']]
+    agg_result_df = find_average_value(agg_result_df)
+    fig = px.bar(agg_result_df, x='predict', y=y_axis)
     return fig
 
 if __name__ == '__main__':
