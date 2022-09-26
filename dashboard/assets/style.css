@@ -58,18 +58,6 @@ p {
   overflow: hidden;
   height: 430px;
 }
-#visualisation1 {
-  margin-top: 30px;
-  width: 100%;
-  overflow: hidden;
-  height: 430px;
-}
-#histogram {
-  width: 700px;
-  height: 430px;
-  margin-left: 35px;
-  float: left;
-}
 #map {
   width: 500px;
   height: 410px;
@@ -78,12 +66,6 @@ p {
 }
 #click-hotel-data {
   margin-left: 540px;
-}
-#barplot {
-  width: 700px;
-  height: 430px;
-  margin-left: 800px;
-  margin-right: 20px;
 }
 #data-extract {
   margin-top: 7px;
@@ -136,7 +118,6 @@ p {
   width: 400px;
   margin-left: 900px;
   margin-top: 60px;
-  /*background-color: white;*/
   border-radius: 10px;
   padding: 20px;
 }
@@ -147,23 +128,6 @@ p {
   background-color: white;
   border-radius: 10px;
   padding: 20px;
-}
-#bar-graph1 {
-  width: 45%;
-  /*margin-left: 40px;*/
-  margin-top: 20px;
-  border-radius: 10px;
-  /*padding: 20px;*/
-  overflow: hidden;
-}
-#bar-graph2 {
-  width: 45%;
-  margin-left: 700px;
-  margin-top: 20px;
-  border-radius: 10px;
-  background-color: white;
-  /*padding: 20px;*/
-  overflow: hidden;
 }
 /********************* BUTTONS *********************/
 #update-button {

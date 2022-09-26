@@ -8,7 +8,7 @@ from model_training import Model_clustering
 def find_average_value(df: pd.DataFrame) -> pd.DataFrame:
     """
     Find average value of hotel group by predict class
-    :param df:
+    :param df: Hotel dataframe
     :return: Aggregate dataframe
     """
     df_summary = df.groupby(['predict'])\
@@ -17,6 +17,12 @@ def find_average_value(df: pd.DataFrame) -> pd.DataFrame:
     return df_summary
 
 def count_hotel_in_group_predict(df: pd.DataFrame, class_:str) -> pd.DataFrame:
+    """
+    Count the number of hotels by prediction class
+    :param df: Hotel dataframe
+    :param class_: Class that to group
+    :return: Count dataframe
+    """
     df_summary = df.groupby(['predict', class_]).agg(count=('name', 'count'))
     df_summary = df_summary.reset_index()
     return df_summary
@@ -34,7 +40,7 @@ result = pd.read_excel('data/output/result.xlsx')
 def plot_map(df:pd.DataFrame) -> pd.DataFrame:
     """
     Plot scatter map with hotel position
-    :param df: Hottel dataframee
+    :param df: Hotel dataframe
     :return: Scattr map
     """
     fig = px.scatter_mapbox(df, lat=df.latitude, lon=df.longitude, hover_name="name", hover_data=["price"],

@@ -12,3 +12,8 @@ RUN pip install plotly
 RUN pip install dash
 RUN pip install dash-bootstrap-components
 RUN pip install -U scikit-learn
+
+ADD . /app/
+
+ENTRYPOINT [ "python3" ]
+CMD ["dashboard/app.py"]
