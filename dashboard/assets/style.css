@@ -7,6 +7,7 @@ body {
 }
 img {
   width: 320px;
+  height: 220px;
   margin-bottom: 20px;
 }
 /********************* TEXT *********************/
@@ -91,17 +92,12 @@ p {
   height: 600px;
 }
 #data-extract1 {
-  /*margin-top: 30px;*/
-  /*width: 500px;*/
   width: 500px;
-  /*overflow: hidden;*/
-  /*height: 450px;*/
   float: left;
 }
 #data-extract2 {
   margin-left: 620px;
   width: 500px;
-  /*overflow: hidden;*/
 }
 #table {
   height: 420px;
@@ -123,7 +119,7 @@ p {
   margin-left: 35px;
   margin-top: 25px;
 }
-#scatter-dropdown {
+#stacked-dropdown {
   height: 20px;
   width: 500px;
   margin-left: 35px;
@@ -212,6 +208,30 @@ p {
 }
 .dropdown .VirtualizedSelectOption  {
   font-size: 14px;
+}
+/********************* DROPDOWNS1 *********************/
+.dropdown1 {
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 5px;
+}
+.dropdown1 .Select-control{
+  background-color: white;
+}
+.dropdown1 .Select-menu-outer{
+  background-color: white;
+}
+.dropdown1 .Select-value{
+  background-color: white;
+  color: white;
+  font-size: 16px;
+}
+.dropdown1 .VirtualizedSelectFocusedOption {
+  background-color: #a5ecd1;
+  color: black;
+}
+.dropdown1 .VirtualizedSelectOption  {
+  font-size: 16px;
 }
 /********************* TOGGLES *********************/
 .toggle {

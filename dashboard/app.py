@@ -16,6 +16,11 @@ def find_average_value(df: pd.DataFrame) -> pd.DataFrame:
     df_summary = df_summary.reset_index()
     return df_summary
 
+def count_hotel_in_group_predict(df: pd.DataFrame, class_:str) -> pd.DataFrame:
+    df_summary = df.groupby(['predict', class_]).agg(count=('name', 'count'))
+    df_summary = df_summary.reset_index()
+    return df_summary
+
 # Prepare hotel data
 df = pd.read_excel('data/hotel_data.xlsx')
 model_clustering = Model_clustering(n_class=5, type='KMeans')
@@ -26,7 +31,8 @@ df = model_clustering.create_feature_facilities(df)
 result = pd.read_excel('data/result.xlsx')
 
 # Plot bar graph from model prediction data
-fig_review = px.bar(result, x='predict', y='review')
+fig_review = px.bar(result, x='predict', y='star')
+# fig = px.bar(result, x="predict", y="star", color="medal", title="Long-Form Input")
 
 def plot_map(df:pd.DataFrame) -> pd.DataFrame:
     """
@@ -46,7 +52,7 @@ def serve_layout() -> html.Div:
     return html.Div([
         html.Div([
             html.H1('Hotel Dashboard'),
-            html.P('Summary of hotel in Phuket'),
+            # html.P('Summary of hotel in Phuket'),
             html.Img(src='assets/logo.jpg'),
             html.Label('Star', className='dropdown-labels'),
             dcc.Dropdown(id='star-dropdown', className='dropdown', multi=True,
@@ -82,7 +88,11 @@ def serve_layout() -> html.Div:
                 step=1,
                 min=0,
                 max=5, value=[0, 5], id='rating_slider', className='n-slider'),
-            # html.Button(id='update-button', children="Apply Model", n_clicks=0)
+            html.Label('Model type', className='dropdown-labels'),
+            dcc.Dropdown(['rating', 'review', 'price'], 'price', id='model-type-dropdown', className='dropdown1'),
+            html.Label('Number of cluster', className='dropdown-labels'),
+            dcc.Dropdown(['rating', 'review', 'price'], 'price', id='n-dropdown', className='dropdown1'),
+            html.Button(id='update-button', children="Apply Model", n_clicks=0)
         ], id='left-container'),
         html.Div([
             html.Div([
@@ -95,6 +105,7 @@ def serve_layout() -> html.Div:
                     html.Div(id='_star', className='result-labels'),
                     html.Div(id='_price', className='result-labels'),
                     html.Div(id='_rating', className='result-labels'),
+                    html.Div(id='_facilities', className='result-labels'),
                     ], id='table-side1')
             ], id='visualisation'),
             html.Div([
@@ -103,8 +114,8 @@ def serve_layout() -> html.Div:
                     dcc.Graph(id='price-bar'),
                 ], id='data-extract1'),
                 html.Div([
-                    dcc.Dropdown(['star'], 'star', id='scatter-dropdown'),
-                    dcc.Graph(id='star-plot', figure=fig_review),
+                    dcc.Dropdown(['star'], 'star', id='stacked-dropdown'),
+                    dcc.Graph(id='star-plot'),
                 ], id='data-extract2')
             ], id='data-extract')
         ], id='right-container')
@@ -119,6 +130,7 @@ app.layout = serve_layout
     Output('_star', 'children'),
     Output('_price', 'children'),
     Output('_rating', 'children'),
+    Output('_facilities', 'children'),
     Input('map', 'clickData')
 )
 def display_click_data(clickData):
@@ -127,7 +139,8 @@ def display_click_data(clickData):
     star = hotel_data.iloc[0, 6]
     price = hotel_data.iloc[0, 7]
     rating = hotel_data.iloc[0, 4]
-    return f'Hotel name: {name}', f'Star: {star}', f'Price: {price} Baht', f'Rating: {rating}'
+    facilities = hotel_data.iloc[0, 8]
+    return f'Hotel name: {name}', f'Star: {star}', f'Price: {price} Baht', f'Rating: {rating}', f'Facilities: {facilities}'
 
 @app.callback(
     Output('map', 'figure'),
@@ -155,6 +168,16 @@ def update_bar(y_axis):
     agg_result_df = agg_result_df[['predict', 'rating', 'price', 'review']]
     agg_result_df = find_average_value(agg_result_df)
     fig = px.bar(agg_result_df, x='predict', y=y_axis)
+    return fig
+
+@app.callback(
+    Output('star-plot', 'figure'),
+    Input('stacked-dropdown', 'value')
+)
+def update_stacked_bar(class_):
+    agg_result_df = result.copy()
+    agg_result_df = count_hotel_in_group_predict(agg_result_df, class_)
+    fig = px.bar(agg_result_df, x="predict", y="count", color="star")
     return fig
 
 if __name__ == '__main__':
