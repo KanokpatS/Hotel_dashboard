@@ -76,8 +76,9 @@ class Model_clustering:
         :return: Model
         """
         dff = self.preprocess(df)
-        model = KMeans(n_clusters=self.n_class)
-        model.fit(dff)
+        if self.type == 'KMeans':
+            model = KMeans(n_clusters=self.n_class)
+            model.fit(dff)
         return model
 
     def predict(self, df:pd.DataFrame, model):
