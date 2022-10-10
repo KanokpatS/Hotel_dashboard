@@ -1,7 +1,8 @@
 import pandas as pd
 pd.options.mode.chained_assignment = None
 from sklearn.cluster import KMeans
-import pickle
+from sklearn.cluster import OPTICS
+from sklearn.cluster import SpectralClustering
 
 class Model_clustering:
     def __init__(self, n_class:int, type:str):
@@ -79,6 +80,10 @@ class Model_clustering:
         if self.type == 'KMeans':
             model = KMeans(n_clusters=self.n_class)
             model.fit(dff)
+        elif self.type == 'OPTICS':
+            model = OPTICS(min_samples=self.n_class).fit(dff)
+        elif self.type == 'SpectralClustering':
+            model = SpectralClustering(n_clusters=self.n_class).fit(dff)
         return model
 
     def predict(self, df:pd.DataFrame, model):
@@ -89,7 +94,11 @@ class Model_clustering:
         :return: Prediction dataframe
         """
         dff = self.preprocess(df)
-        all_predictions = model.predict(dff)
+        if self.type == 'KMeans':
+            all_predictions = model.predict(dff)
+        elif self.type in ['OPTICS', 'SpectralClustering']:
+            all_predictions = model.labels_
+            print(all_predictions)
         df['predict'] = all_predictions
         filename = f'data/output/result_{self.type}_{self.n_class}.xlsx'
         df.to_excel(filename)
