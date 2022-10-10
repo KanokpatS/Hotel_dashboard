@@ -92,7 +92,7 @@ def serve_layout() -> html.Div:
                 min=0,
                 max=5, value=[0, 5], id='rating_slider', className='n-slider'),
             html.Label('Model type', className='dropdown-labels'),
-            dcc.Dropdown(['KMeans'], 'KMeans', id='model-type-dropdown', className='dropdown1'),
+            dcc.Dropdown(['KMeans', 'OPTICS', 'SpectralClustering'], 'KMeans', id='model-type-dropdown', className='dropdown1'),
             html.Label('Number of cluster', className='dropdown-labels'),
             dcc.Dropdown([3, 4, 5, 6, 7], 5, id='n-dropdown', className='dropdown1'),
             html.Button(id='update-button', children="Apply Model", n_clicks=0)
@@ -186,7 +186,13 @@ def update_bar(model_type, n_class, n_clicks, y_axis):
         agg_result_df = result_df.copy()
     agg_result_df = agg_result_df[['predict', 'rating', 'price', 'review']]
     agg_result_df = find_average_value(agg_result_df)
-    fig = px.bar(agg_result_df, x='predict', y=y_axis)
+    fig = px.bar(agg_result_df, x='predict', y=y_axis,
+                 labels={
+                     'price': 'price(bath)',
+                     'rating': 'rating(star)',
+                     'review': 'review(times)'
+                 },
+                 title=f'Bar graph between {y_axis} and class')
     return fig
 
 @app.callback(
@@ -204,7 +210,12 @@ def update_stacked_bar(model_type, n_class, n_clicks, class_):
         result_df = model_clustering.predict(df_train, model)
         agg_result_df = result_df.copy()
     agg_result_df = count_hotel_in_group_predict(agg_result_df, class_)
-    fig = px.bar(agg_result_df, x="predict", y="count", color="star")
+    fig = px.bar(agg_result_df, x="predict", y="count", color="star",
+                 labels={
+                     'star': 'star(star)'
+                 },
+                 title=f'Stack bar graph between {y_axis} and class'
+                 )
     return fig
 
 if __name__ == '__main__':
