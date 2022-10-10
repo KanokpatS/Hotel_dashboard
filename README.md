@@ -19,16 +19,18 @@
 1. Use docerfile in branch deployment
 2. Build docker image
 
-  `docker build -t hotel_dashboard .`
+   `docker build -t hotel_dashboard .`
   
 3. Test docker container
 
   `docker run -it --name hotel_dashboard -p 8080:8080 hotel_dashboard`
   
 4. Login dokerhub
+
   `docker login`
 
 5. Tag and push docker image into dokcerhub
+
   `docker tag hotel_dashboard {docker username}/hotel_dashboard:{version}`
 
   `docker push {docker username}hotel_dashboard:{version}`
